@@ -49,10 +49,51 @@ export default async function Home() {
   // ###########################
   const userWithTasks = await prisma.user.findMany({
     orderBy: { username: "desc" },
-    include: { tasks: true }
+    include: { tasks: true },
   });
 
-  console.log("Users in db, with tasks: ", userWithTasks);
+  console.log(
+    "Users in db, with tasks: ",
+    JSON.stringify(userWithTasks, null, 2)
+  );
+
+  // ########################### add new user with 2 default tasks
+  // const userandtasks = await prisma.user.create({
+  //   data: {
+  //     username: "John Doe",
+  //     email: "john.doe@app.com",
+  //     password: "123456",
+  //   },
+  // });
+
+  // await prisma.task.create({
+  //   data: {
+  //     taskname: "Task 1",
+  //     status: false,
+  //     userId: {
+  //       connect: {
+  //         email: user.email,
+  //       },
+  //     }
+  //   },
+  // });
+
+  // await prisma.task.create({
+  //   data: {
+  //     taskname: "Task 2",
+  //     status: false,
+  //     userId: {
+  //       connect: {
+  //         email: user.email,
+  //       },
+  //     }
+  //   },
+  // });
+
+  // console.log(
+  //   "new User in db, with default tasks: ",
+  //   JSON.stringify(userandtasks, null, 2)
+  // );
 
   return (
     <>
@@ -79,25 +120,6 @@ export default async function Home() {
             </div>
           ))} 
           */}
-
-          {/* {userWithTasks?.[0]?.tasks?.map((task) => (
-            <div key={task.id} className="bg-white p-4 rounded-lg shadow">
-              <h3 className="font-bold">{task.title}</h3>
-              <p className="text-gray-600">{task.description}</p>
-              <div className="flex justify-between items-center mt-2">
-                <span
-                  className={`text-sm ${
-                    task.completed ? "text-green-500" : "text-red-500"
-                  }`}
-                >
-                  {task.completed ? "Completed" : "Pending"}
-                </span>
-                <span className="text-sm text-gray-500">
-                  {new Date(task.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-            </div>
-          ))} */}
 
           <Link
             href="/login"
