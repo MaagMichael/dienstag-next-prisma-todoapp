@@ -1,0 +1,37 @@
+npx create-next-app@latest
+
+npm run dev
+
+Metadata in layout.tsx
+
+Setup Prisma:
+https://www.prisma.io/docs/getting-started/quickstart-sqlite
+
+npm install prisma --save-dev
+
+npx prisma init --datasource-provider sqlite
+show new folder prisma and file.sqlite
+
+created as well under root a .env file with key DATABASE_URL (future db)
+
+Ext. Prisma
+Ext. Prisma Entity-Relationship Diagrams visualizer
+
+npx prisma db push
+SQLite database dev.db created at file:./dev.db (if it doesn't exist)
+
+define schema User with id, username, email, password
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+npx prisma db push
+It updates the database schema to match the models defined in your schema.prisma file.
+db file not empty any more
+created at ....\dienstag-next-prisma-todoapp\node_modules\prisma\prisma-client more files
