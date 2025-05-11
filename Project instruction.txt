@@ -2,6 +2,8 @@ npx create-next-app@latest
 
 npm run dev
 
+################################################# ZIP Starter-next-prisma-todoApp.zip
+
 Metadata in layout.tsx
 
 Setup Prisma:
@@ -13,12 +15,16 @@ npx prisma init --datasource-provider sqlite
 show new folder prisma and file.sqlite
 
 created as well under root a .env file with key DATABASE_URL (future db)
+--------------------------------------------------------
 
 Ext. Prisma
 Ext. Prisma Entity-Relationship Diagrams visualizer
 
+--------------------------------------------------------
 npx prisma db push
 SQLite database dev.db created at file:./dev.db (if it doesn't exist)
+
+--------------------------------------------------------
 
 define schema User with id, username, email, password
 model User {
@@ -35,3 +41,213 @@ npx prisma db push
 It updates the database schema to match the models defined in your schema.prisma file.
 db file not empty any more
 created at ....\dienstag-next-prisma-todoapp\node_modules\prisma\prisma-client more files
+
+--------------------------------------------------------
+
+npx prisma studio in new terminal
+open on http://localhost:5555/
+
+click on table and see defined keys and its values
+add manually in prisma studio some user data, press enter and save changes:
+id is a number ! by prisma
+user1
+user1@app.com
+123456
+
+--------------------------------------------------------
+Now connect to db from code to read out data:
+
+https://www.prisma.io/docs/orm/prisma-client/setup-and-configuration/databases-connections#prevent-hot-reloading-from-creating-new-instances-of-prismaclient
+Prevent hot reloading from creating new instances of PrismaClient, so store PrismaClient as a global variable in development environments only
+
+under src/lib/client.ts:
+
+import { PrismaClient } from '@prisma/client'
+const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
+export const prisma =
+  globalForPrisma.prisma || new PrismaClient()
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+
+Then set up and generate the Prisma Client, which is the library you use to interact with your database in your code
+npm install @prisma/client
+
+Generates the Prisma Client based on the models defined in your schema.prisma file.
+npx prisma generate
+
+--------------------------------------------------------
+
+in src/app/page.tsx to try out:
+import { prisma } from "@/lib/client";
+
+export default async function Home() {
+  // read out number of users in db
+  const count = await prisma.user.count();
+  console.log("Count of User: ", count);
+  return ()....}
+
+
+
+bei Fehler:
+npm uninstall @prisma/client prisma
+npm install @prisma/client
+npm install prisma --save-dev
+npx prisma generate
+
+################################################# ZIP Prisma01-next-prisma-todoApp.zip
+
+add user via code to db
+
+page.tsx
+// Only create a user if none exist
+  if (count === 1) {
+    try {
+      const user = await prisma.user.create({
+        data: {
+          username: "John Doe",
+          email: "john.doe@app.com",
+          password: "123456",
+        },
+      });
+      console.log("Created user:", user);
+    } catch (error) {
+      console.error("Error creating user:", error);
+    }
+  }
+
+  // Get updated count
+  const updatedCount = await prisma.user.count();
+  console.log("Updated count of User: ", updatedCount);
+
+  -> delete code of adding user via code to db
+
+  --------------------------------------------------------
+
+find a specific email in db:
+const userfind = await prisma.user.findUnique({
+    where: {
+      email: "user1@app.com",
+    },
+  });
+console.log("User data by unique email: ", userfind);
+
+( only because "email     String   @unique" in schema)
+
+--------------------------------------------------------
+
+in package.json under scripts add:
+"prisma:push": "npx prisma db push",
+"prisma:studio": "npx prisma studio"
+
+-> e.g. "npm run prisma:push" in CLI
+
+--------------------------------------------------------
+
+Enter UIID in schema.prisma
+id        String      @id @default(uuid())
+stop both servers
+then "npx prisma db push" to update, accept changes with Yes, 
+Push the Schema to the Database: npx prisma db push
+Generate the Prisma Client: npx prisma generate
+restart npm run dev, restart npx prisma studio
+delete all users in prisma studio
+add manually new user in prisma studio and see new uuid
+
+--------------------------------------------------------
+
+Read out DB:
+
+const usersall = await prisma.user.findMany({
+    orderBy: {
+      username: "desc",
+    },
+  });
+  console.log("Users in db, sorted by name: ", usersall);
+
+render in return block:
+
+{usersall.map((user) => (
+            <div key={user.id} className="mb-4">
+              <p>
+                <strong>Username:</strong> {user.username}
+              </p>
+              <p>
+                <strong>Email:</strong> {user.email}
+              </p>
+
+              <p>
+                <strong>Password:</strong> {user.password}
+              </p>
+            </div>
+          ))}
+
+--------------------------------------------------------
+
+const usersall = await prisma.user.findMany({
+    orderBy: {
+      username: "desc",
+    },
+    select: {
+      id: true,
+      username: true,
+      email: true
+    }
+  });
+  console.log("Users in db, sorted by name: ", usersall);
+
+render in return block:
+
+{usersall.map((user) => (
+            <div key={user.id} className="mb-4">
+              <p>
+                <strong>Username:</strong> {user.username}
+              </p>
+              <p>
+                <strong>Email:</strong> {user.email}
+              </p>
+
+              <p>
+                {/* <strong>Password:</strong> {user.password} */}
+              </p>
+              <p>
+                <strong>ID:</strong> {user.id}
+              </p>
+            </div>
+          ))}
+
+################################################# ZIP Prisma02-next-prisma-todoApp.zip
+
+OPTINAL
+Migration in a team project to keep the database schema in sync across all team members.
+
+npx prisma migrate dev
+creates a new file in the migrations folder 
+
+You may use prisma migrate reset to drop the development database.
+All data will be lost.
+
+then make changes on schema, do "npx prisma migrate dev --name init" again and do npx prisma db push, then npx prisma studio
+
+--------------------------------------------------------
+
+Relation 1 to Many:
+
+model Task {
+  id        Int      @id @default(autoincrement())
+  taskname  String
+  status    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+}
+
+explain foreign key and primary key
+
+--------------------------------------------------------
+
+add manually some tasks in db with related userIds
+
+--------------------------------------------------------
+
+read out tasks from db for a specific user and render in return block:
+
