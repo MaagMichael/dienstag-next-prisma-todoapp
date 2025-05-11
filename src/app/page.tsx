@@ -46,19 +46,13 @@ export default async function Home() {
   // });
   // console.log("Users in db, sorted by name: ", usersall);
 
-  // Read tasks for a specific user (example with user ID 1)
+  // ###########################
   const userWithTasks = await prisma.user.findMany({
-    orderBy: {
-      username: "desc",
-    },
-    // select: {
-    //   username: true,
-    // },
-    include: {
-      Task: true,
-    },
+    // orderBy: { username: "desc" },
+    include: { tasks: true }
   });
-  console.log("Users in db, with tasks: ", userWithTasks);
+
+  // console.log("Users in db, with tasks: ", userWithTasks);
 
   return (
     <>
