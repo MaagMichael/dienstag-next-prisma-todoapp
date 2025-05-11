@@ -48,11 +48,11 @@ export default async function Home() {
 
   // ###########################
   const userWithTasks = await prisma.user.findMany({
-    // orderBy: { username: "desc" },
+    orderBy: { username: "desc" },
     include: { tasks: true }
   });
 
-  // console.log("Users in db, with tasks: ", userWithTasks);
+  console.log("Users in db, with tasks: ", userWithTasks);
 
   return (
     <>
